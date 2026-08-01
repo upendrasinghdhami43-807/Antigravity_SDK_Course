@@ -1,18 +1,10 @@
 .venv/
 .env
 logs/
+exports/
 __pycache__/
 .vscode/
 *.pyc
-#data
-data/
-data/history.json
-data/memory.json
-data/session.json
-data/settings.json
-data/statistics.json
 
-#logs
-logs/
-
-
+# Ignore all user generated data
+data/*.json
