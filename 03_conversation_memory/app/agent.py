@@ -1,5 +1,5 @@
 import json
-import google.generativeai as genai
+from google import genai
 from typing import Dict, Any
 
 from app.config import GEMINI_API_KEY
@@ -8,25 +8,25 @@ from app.logger import get_logger
 
 logger = get_logger("Agent")
 
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-
 class Agent:
     def __init__(self):
-        # Initialize Gemini Model
+        # Initialize Gemini Model Client
         if GEMINI_API_KEY:
-            self.model = genai.GenerativeModel('gemini-1.5-pro')
-            self.fast_model = genai.GenerativeModel('gemini-1.5-flash')
+            self.client = genai.Client(api_key=GEMINI_API_KEY)
+            self.model_name = 'gemini-2.0-flash'
+            self.fast_model_name = 'gemini-2.0-flash-lite'
         else:
             logger.warning("No API key provided. Agent will not work properly.")
-            self.model = None
-            self.fast_model = None
+            self.client = None
 
     def generate_response(self, prompt: str) -> str:
-        if not self.model:
+        if not self.client:
             return "Error: Gemini API key is not configured."
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt
+            )
             return response.text.strip()
         except Exception as e:
             logger.error(f"Error generating response: {e}")
@@ -34,7 +34,7 @@ class Agent:
 
     def extract_facts(self, user_input: str, assistant_response: str) -> Dict[str, Any]:
         """Uses a faster model to extract facts from the conversation turn."""
-        if not self.fast_model:
+        if not self.client:
             return {}
         
         prompt = FACT_EXTRACTION_PROMPT.format(
@@ -42,7 +42,10 @@ class Agent:
             assistant_response=assistant_response
         )
         try:
-            response = self.fast_model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.fast_model_name,
+                contents=prompt
+            )
             result_text = response.text.strip()
             
             if result_text == "NONE" or result_text.startswith("NONE"):
@@ -64,12 +67,15 @@ class Agent:
 
     def summarize_history(self, history_text: str) -> str:
         """Uses the model to summarize conversation history."""
-        if not self.fast_model:
+        if not self.client:
             return ""
         
         prompt = SUMMARIZATION_PROMPT.format(history=history_text)
         try:
-            response = self.fast_model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.fast_model_name,
+                contents=prompt
+            )
             return response.text.strip()
         except Exception as e:
             logger.error(f"Error summarizing history: {e}")
