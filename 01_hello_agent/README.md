@@ -6,13 +6,13 @@ Module 1 of the AI Agent Bootcamp.
 
 
 #Agent Working (outputs)
-(.venv) upendra-singh-dhami@XubuntuLinuxBhupesh:~/Antigravity_SDK course/01_hello_agent$ python app/main.py
+(.venv) AsusVivobookpro@XubuntuLinuxBhupesh:~/Antigravity_SDK course/01_hello_agent$ python app/main.py
 Hello Agent
 You : say hello       
 
 Agent :
 Hello! How can I help you today?
-(.venv) upendra-singh-dhami@XubuntuLinuxBhupesh:~/Antigravity_SDK course/01_hello_agent$ python app/main.py
+(.venv) AsusVivobookpro@XubuntuLinuxBhupesh:~/Antigravity_SDK course/01_hello_agent$ python app/main.py
 Hello Agent
 You : tell you something about you , your model details
 
