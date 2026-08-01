@@ -46,7 +46,7 @@ class StreamManager:
                         first_token_time = time.time() - start_time
                         self.stats_mgr.add_latency(first_token_time)
                         
-                    self.renderer.render_chunk(chunk)
+                    await self.renderer.render_chunk(chunk)
                     self.buffer.add_chunk(chunk)
                     
                 # Yield control to the event loop occasionally
@@ -56,7 +56,7 @@ class StreamManager:
             logger.info("Stream cancelled via asyncio.")
         except Exception as e:
             logger.error(f"Stream error: {e}")
-            self.renderer.render_chunk(f"\n[Error: {e}]")
+            await self.renderer.render_chunk(f"\n[Error: {e}]")
         finally:
             self.renderer.finish()
             self.is_streaming = False

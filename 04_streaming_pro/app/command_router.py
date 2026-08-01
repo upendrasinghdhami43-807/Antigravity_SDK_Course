@@ -23,7 +23,8 @@ class CommandRouter:
             print_help()
             
         elif cmd == "clear":
-            print('\033[2J\033[H', end='') # ANSI escape to clear screen
+            import os
+            os.system('cls' if os.name == 'nt' else 'clear')
             
         elif cmd == "models":
             print_header("Available Gemini Models")
@@ -101,10 +102,10 @@ class CommandRouter:
         elif cmd == "stream":
             if len(cmd_parts) > 1:
                 arg = cmd_parts[1].lower()
-                if arg in ["on", "true", "1"]:
+                if arg in ["on", "true", "1", "enabled"]:
                     self.chat_engine.settings_mgr.set("streaming", "ON")
                     print("\nStreaming turned ON.\n")
-                elif arg in ["off", "false", "0"]:
+                elif arg in ["off", "false", "0", "disabled"]:
                     self.chat_engine.settings_mgr.set("streaming", "OFF")
                     print("\nStreaming turned OFF.\n")
                 else:

@@ -97,7 +97,8 @@ class ChatEngine:
         context_prompt = self.context_builder.build_context(user_input)
         
         # 3. Generate Response via Stream Manager
-        use_streaming = self.settings_mgr.get("streaming", "ON").upper() == "ON"
+        stream_val = self.settings_mgr.get("streaming", "ON").upper()
+        use_streaming = stream_val in ["ON", "ENABLED", "TRUE", "1"]
         
         assistant_response = await self.stream_mgr.run_stream(context_prompt, use_streaming=use_streaming)
         
