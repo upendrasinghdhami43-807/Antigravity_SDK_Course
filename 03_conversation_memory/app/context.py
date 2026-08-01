@@ -49,3 +49,16 @@ class ContextBuilder:
             recent_messages = recent_messages[-(MAX_HISTORY_MESSAGES//2):]
             
         return recent_messages
+
+    def build_context(self, user_input: str) -> str:
+        """Builds the final prompt string to send to Gemini."""
+        sys_prompt = self.build_system_prompt()
+        history_msgs = self.get_context_messages()
+        
+        context = sys_prompt + "\n\n"
+        context += "--- Conversation History ---\n"
+        for msg in history_msgs:
+            context += f"{msg.role.capitalize()}: {msg.text}\n"
+            
+        context += f"\nUser: {user_input}\n"
+        return context

@@ -42,7 +42,10 @@ class ChatEngine:
         self.command_router = CommandRouter(self)
 
     def run(self):
-        print("AI Assistant started. Type '/help' for commands, 'exit' to quit.")
+        print("\n" + "="*40)
+        print("🚀 Welcome to Antigravity AI Assistant! 🚀")
+        print("="*40)
+        print("Type '/help' for commands, '/exit' to quit.")
         
         while True:
             try:
@@ -88,8 +91,8 @@ class ChatEngine:
         self.stats_mgr.add_tokens(prompt_tokens, response_tokens)
         
         # 6. Save History
-        self.history_mgr.add_message("user", user_input)
-        self.history_mgr.add_message("assistant", assistant_response)
+        self.history_mgr.append_message("user", user_input)
+        self.history_mgr.append_message("assistant", assistant_response)
         
         # 7. Extract Memory (Facts)
         new_facts = self.agent.extract_facts(user_input, assistant_response)

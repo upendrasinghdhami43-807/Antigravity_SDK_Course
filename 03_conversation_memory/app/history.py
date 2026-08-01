@@ -32,6 +32,9 @@ class HistoryManager:
     def get_recent_messages(self, count: int) -> List[Message]:
         return self.messages[-count:]
 
+    def get_formatted_history(self) -> str:
+        return "\n".join([f"{msg.role.capitalize()}: {msg.text}" for msg in self.messages])
+
     def clear_history(self):
         self.messages = []
         self.save_history()

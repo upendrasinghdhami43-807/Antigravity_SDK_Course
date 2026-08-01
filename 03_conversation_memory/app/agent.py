@@ -73,7 +73,7 @@ class Agent:
         )
         try:
             response = self.client.models.generate_content(
-                model=self.fast_model_name,
+                model=self.model_mgr.get_current_model(),
                 contents=prompt
             )
             result_text = response.text.strip()
@@ -104,7 +104,7 @@ class Agent:
         prompt = SUMMARIZATION_PROMPT.format(history=history_text)
         try:
             response = self.client.models.generate_content(
-                model=self.fast_model_name,
+                model=self.model_mgr.get_current_model(),
                 contents=prompt
             )
             return response.text.strip()

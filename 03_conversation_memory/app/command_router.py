@@ -36,7 +36,17 @@ class CommandRouter:
                     print(f"{idx}. {m}")
                     
             print("\nCurrent Model:\n" + self.chat_engine.model_mgr.get_current_model() + "\n")
-            print("Tip: Type '/model <number>' to quickly switch!\n")
+            
+            # Interactive choice
+            choice = input("Enter a number to switch model (or press Enter to cancel): ").strip()
+            if choice:
+                old_model = self.chat_engine.model_mgr.get_current_model()
+                if self.chat_engine.model_mgr.switch_model(choice):
+                    print(f"\nModel changed: {old_model} -> {self.chat_engine.model_mgr.get_current_model()}\n")
+                else:
+                    print(f"\nError: Invalid choice '{choice}'. Model not changed.\n")
+            else:
+                print()
             
         elif cmd == "model":
             if len(cmd_parts) > 1:
