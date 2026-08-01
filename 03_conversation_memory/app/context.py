@@ -5,7 +5,7 @@ from app.history import HistoryManager
 from app.memory import MemoryManager
 from app.summarizer import SummaryManager
 from app.prompts import SYSTEM_PROMPT
-from app.tokenizer import estimate_tokens
+from app.tokenizer import TokenManager
 from app.logger import get_logger
 
 logger = get_logger("ContextBuilder")
@@ -42,8 +42,7 @@ class ContextBuilder:
         # In a real app, you would count tokens and summarize if limit is breached.
         recent_messages = all_messages[-MAX_HISTORY_MESSAGES:]
         
-        # Example of token checking:
-        total_tokens = sum(estimate_tokens(msg.text) for msg in recent_messages)
+        total_tokens = sum(TokenManager.count_tokens(msg.text) for msg in recent_messages)
         if total_tokens > MAX_HISTORY_TOKENS:
             logger.warning("History token limit exceeded. (Summarization should be triggered here)")
             # Here we would trigger summarize, for now we just truncate

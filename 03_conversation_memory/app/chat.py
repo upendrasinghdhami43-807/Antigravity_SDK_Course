@@ -1,148 +1,115 @@
 import sys
 from app.agent import Agent
+from app.context import ContextBuilder
 from app.history import HistoryManager
 from app.memory import MemoryManager
-from app.session import SessionManager
 from app.summarizer import SummaryManager
-from app.context import ContextBuilder
+from app.session import SessionManager
+from app.settings import SettingsManager
+from app.statistics import StatisticsManager
+from app.model_manager import ModelManager
+from app.tokenizer import TokenManager
 from app.logger import get_logger
 
-logger = get_logger("Chat")
+logger = get_logger("ChatEngine")
 
-class ChatManager:
-    def __init__(self):
+class ChatEngine:
+    def __init__(self, client):
+        logger.info("Initializing Chat Engine")
+        
+        # Initialize Managers
+        self.settings_mgr = SettingsManager()
+        self.stats_mgr = StatisticsManager()
+        self.model_mgr = ModelManager(client, self.settings_mgr)
         self.history_mgr = HistoryManager()
         self.memory_mgr = MemoryManager()
-        self.session_mgr = SessionManager()
         self.summary_mgr = SummaryManager()
+        self.session_mgr = SessionManager()
         
+        # Initialize Core Components
+        self.agent = Agent(client, self.model_mgr)
         self.context_builder = ContextBuilder(
-            self.history_mgr,
-            self.memory_mgr,
-            self.summary_mgr
+            history_mgr=self.history_mgr,
+            memory_mgr=self.memory_mgr,
+            summary_mgr=self.summary_mgr
         )
         
-        self.agent = Agent()
+        # Start Session
+        self.session_mgr.start_session()
+        
+        # Deferred import to avoid circular dependency if router needs ChatEngine
+        from app.command_router import CommandRouter
+        self.command_router = CommandRouter(self)
 
-    def process_command(self, user_input: str) -> bool:
-        cmd = user_input.lower().strip()
-        
-        if cmd == "exit" or cmd == "quit":
-            print("\nSaving session and exiting. Goodbye!")
-            return True
-            
-        elif cmd == "help":
-            print("\nAvailable commands:")
-            print("  help    - Show this message")
-            print("  clear   - Clear the current screen")
-            print("  history - Display recent message history")
-            print("  summary - Show the current conversation summary")
-            print("  memory  - Display extracted user facts")
-            print("  reset   - Reset history and memory")
-            print("  export  - Export history to markdown")
-            print("  exit    - Exit the application")
-            
-        elif cmd == "clear":
-            print('\033[2J\033[H', end='') # ANSI escape to clear screen
-            
-        elif cmd == "history":
-            messages = self.history_mgr.get_recent_messages(10)
-            print("\n--- Recent History ---")
-            if not messages:
-                print("No history found.")
-            for msg in messages:
-                print(f"{msg.role.capitalize()}: {msg.text}")
-            print("----------------------")
-            
-        elif cmd == "summary":
-            print("\n--- Current Summary ---")
-            print(self.summary_mgr.get_summary())
-            print("-----------------------")
-            
-        elif cmd == "memory":
-            print("\n--- User Memory ---")
-            print(self.memory_mgr.get_memory_string())
-            print("-------------------")
-            
-        elif cmd == "reset":
-            confirm = input("Are you sure you want to delete all history and memory? (y/n): ")
-            if confirm.lower() == 'y':
-                self.history_mgr.clear_history()
-                self.memory_mgr.clear_memory()
-                self.summary_mgr.update_summary("")
-                print("History and memory reset.")
-                
-        elif cmd == "export":
-            messages = self.history_mgr.get_messages()
-            try:
-                with open("conversation_export.md", "w") as f:
-                    f.write("# Conversation Export\n\n")
-                    for msg in messages:
-                        f.write(f"**{msg.role.capitalize()}**:\n{msg.text}\n\n")
-                print("Exported to conversation_export.md")
-            except Exception as e:
-                print(f"Failed to export: {e}")
-                
-        else:
-            return False # Not a command
-            
-        return False # Handled command, don't exit
-
-    def build_prompt(self, user_input: str) -> str:
-        sys_prompt = self.context_builder.build_system_prompt()
-        context_msgs = self.context_builder.get_context_messages()
-        
-        # We need to construct a single string prompt for Gemini
-        # Alternatively we could use Gemini's ChatSession, but the roadmap 
-        # specifically asks for a ContextBuilder that combines everything into "One Prompt"
-        
-        prompt_parts = [sys_prompt, "\n--- Recent Conversation ---"]
-        for msg in context_msgs:
-            prompt_parts.append(f"{msg.role.capitalize()}: {msg.text}")
-            
-        prompt_parts.append(f"\nUser: {user_input}")
-        prompt_parts.append("Assistant:")
-        
-        return "\n".join(prompt_parts)
-
-    def chat_loop(self):
-        print("AI Assistant started. Type 'help' for commands, 'exit' to quit.")
+    def run(self):
+        print("AI Assistant started. Type '/help' for commands, 'exit' to quit.")
         
         while True:
             try:
-                user_input = input("\nYou: ")
-                if not user_input.strip():
+                user_input = input("\nYou: ").strip()
+                if not user_input:
                     continue
+
+                if user_input.startswith("/") or user_input.lower() in ["exit", "quit", "help", "clear", "history", "summary", "memory", "stats", "token", "models", "model", "export", "settings", "reset"]:
+                    should_exit = self.command_router.handle_command(user_input)
+                    if should_exit:
+                        self.shutdown()
+                        break
+                    continue
+
+                self.process_chat(user_input)
                 
-                # Check for commands
-                if self.process_command(user_input):
-                    break
-                    
-                # Build context and prompt
-                full_prompt = self.build_prompt(user_input)
-                
-                # Get response
-                print("Assistant: ", end="", flush=True)
-                response_text = self.agent.generate_response(full_prompt)
-                print(response_text)
-                
-                # Update Session
-                self.session_mgr.increment_message_count()
-                
-                # Update History
-                self.history_mgr.append_message("user", user_input)
-                self.history_mgr.append_message("assistant", response_text)
-                
-                # Extract Memory Facts in the background (or synchronously here)
-                new_facts = self.agent.extract_facts(user_input, response_text)
-                if new_facts:
-                    self.memory_mgr.update_facts(new_facts)
-                    
-                # (Optional) Token summarization logic would go here if threshold is met
-                
-            except KeyboardInterrupt:
-                print("\nExiting...")
+            except (KeyboardInterrupt, EOFError):
+                print("\nSaving session and exiting. Goodbye!")
+                self.shutdown()
                 break
             except Exception as e:
-                logger.error(f"Unexpected error in chat loop: {e}")
+                logger.error(f"Unexpected error: {e}")
                 print(f"\nAn error occurred: {e}")
+
+    def process_chat(self, user_input: str):
+        # 1. Update stats
+        self.stats_mgr.increment_questions()
+        
+        # 2. Build Context
+        context_prompt = self.context_builder.build_context(user_input)
+        
+        # 3. Generate Response
+        assistant_response, elapsed_time = self.agent.generate_response(context_prompt)
+        print(f"Assistant: {assistant_response}")
+        
+        # 4. Update stats for response
+        self.stats_mgr.increment_responses()
+        self.stats_mgr.add_response_time(elapsed_time)
+        
+        # 5. Token Calculation
+        prompt_tokens = TokenManager.count_tokens(context_prompt)
+        response_tokens = TokenManager.count_tokens(assistant_response)
+        self.stats_mgr.add_tokens(prompt_tokens, response_tokens)
+        
+        # 6. Save History
+        self.history_mgr.add_message("user", user_input)
+        self.history_mgr.add_message("assistant", assistant_response)
+        
+        # 7. Extract Memory (Facts)
+        new_facts = self.agent.extract_facts(user_input, assistant_response)
+        if new_facts:
+            self.memory_mgr.update_facts(new_facts)
+            
+        # 8. Check if Summarization is needed based on settings
+        limit = int(self.settings_mgr.get("summary_limit", 50))
+        if len(self.history_mgr.get_messages()) >= limit:
+            history_text = self.history_mgr.get_formatted_history()
+            new_summary = self.agent.summarize_history(history_text)
+            self.summary_mgr.update_summary(new_summary)
+            # Leave recent messages but trim history to save context
+            self.history_mgr.messages = self.history_mgr.messages[-10:]
+            self.history_mgr.save_history()
+            
+    def shutdown(self):
+        self.session_mgr.save_session()
+        duration = getattr(self.session_mgr.current_session, "duration_seconds", 0) if self.session_mgr.current_session else 0
+        self.stats_mgr.add_duration(duration)
+        self.stats_mgr.save_stats()
+        # History, memory, etc. are saved continuously as they update
+        sys.exit(0)
