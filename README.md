@@ -4,6 +4,9 @@
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![OS](https://img.shields.io/badge/OS-Linux%20%7C%20macOS-green)
 
+**🔗 GitHub Repository:** [https://github.com/upendrasinghdhami43-807/Antigravity_SDK_Course](https://github.com/upendrasinghdhami43-807/Antigravity_SDK_Course)
+
+
 Welcome to the **Google Antigravity SDK Mastery Course**! This repository is a comprehensive, from-scratch bootcamp designed to take you from learning basic SDK usage to becoming a professional **AI Agent Engineer**.
 
 Instead of isolated examples, this course builds production-grade applications from first principles, culminating in autonomous agents, multi-agent systems, and real-time streaming AI applications.
