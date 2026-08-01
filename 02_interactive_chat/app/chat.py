@@ -26,6 +26,7 @@ class ChatSession:
         console.print("[bold green]Interactive AI Chat[/bold green]")
         console.print("Type [bold yellow]exit[/bold yellow], [bold yellow]quit[/bold yellow], or [bold yellow]bye[/bold yellow] anytime.")
         console.print("Type [bold yellow]clear[/bold yellow] to clear terminal.")
+        console.print("Type [bold yellow]reset[/bold yellow] to clear chat history.")
         console.print("Type [bold yellow]help[/bold yellow] for commands.")
         console.print("[cyan]===================================[/cyan]\n")
         logger.info("Application Started")
@@ -34,6 +35,7 @@ class ChatSession:
         console.print("\n[bold cyan]Available Commands:[/bold cyan]")
         console.print("  [yellow]exit, quit, bye[/yellow] - Stop the chat")
         console.print("  [yellow]clear[/yellow]           - Clear the terminal screen")
+        console.print("  [yellow]reset[/yellow]           - Erase chat history and start fresh")
         console.print("  [yellow]help[/yellow]            - Show this help message\n")
 
     def run(self):
@@ -55,6 +57,12 @@ class ChatSession:
             
             if lower_input == 'clear':
                 clear_terminal()
+                continue
+                
+            if lower_input == 'reset':
+                self.history.clear()
+                self.agent.reset()
+                console.print("[green]Chat history cleared! Starting a fresh session.[/green]")
                 continue
                 
             if lower_input == 'help':

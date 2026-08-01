@@ -27,3 +27,7 @@ class History:
                     self.messages = json.load(f)
             except Exception:
                 self.messages = []
+
+    def clear(self):
+        self.messages = []
+        self.save()

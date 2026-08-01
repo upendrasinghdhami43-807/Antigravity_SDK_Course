@@ -8,6 +8,9 @@ class Agent:
         if not API_KEY:
             raise ValueError("API Key is missing. Please set GEMINI_API_KEY in .env")
         self.client = genai.Client(api_key=API_KEY)
+        self.reset()
+        
+    def reset(self):
         self.chat_session = self.client.chats.create(
             model=MODEL,
             config={"system_instruction": SYSTEM_PROMPT}
