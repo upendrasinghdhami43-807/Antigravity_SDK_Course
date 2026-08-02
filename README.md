@@ -15,7 +15,7 @@ Instead of isolated examples, this course builds production-grade applications f
 
 ## 📖 Curriculum Overview
 
-The course is divided into three distinct phases. 
+The course is divided into two distinct phases. 
 
 ### ✅ Phase 1: SDK Fundamentals (Completed)
 This phase introduces the core concepts of building AI agents, managing state, and rendering tokens in real-time.
@@ -25,13 +25,14 @@ This phase introduces the core concepts of building AI agents, managing state, a
 * **[Module 3: Conversation Memory](./03_conversation_memory/)** - Advanced state management, automatic summarization, and extracting facts to a long-term JSON memory.
 * **[Module 4: Streaming API Pro](./04_streaming_pro/)** - A complete asynchronous architecture replicating ChatGPT's live typewriter effect, featuring token-by-token rendering, TTFB latency tracking, and interrupt (Ctrl+C) handling.
 
-### 🚧 Phase 2: Autonomous Agents (In Progress)
-* *Module 5: Tool Calling & Actions* (Coming Soon)
-* *Module 6: RAG & Vector Databases* (Coming Soon)
-* *Module 7: The Planning Agent* (Coming Soon)
+### ✅ Phase 2: AI Agent Architecture (Completed)
+Modules 05, 06, and 07 have been combined into one unified **Master AI Agent Framework**. This acts as an "AI Operating System" or DevTools console for autonomous agents.
 
-### 🚧 Phase 3: Multi-Agent Systems
-* *Advanced multi-agent orchestration projects* (Coming Soon)
+* **[Module 5: Architecture Framework](./05_ai_api_architecture/)** - A massive, unified project encompassing:
+  * **Core Engine:** Command routers, event dispatchers, session management, and robust logging.
+  * **Prompt Pipeline:** Dynamic variable injection, personas, system instructions, and structural templating.
+  * **Structured Output:** Pydantic schema validation, automated JSON parsing, and self-healing agent retries.
+  * **Model Management:** Dynamic model switching (supporting 40+ Gemini models natively), rate limit handling, and API integration.
 
 ---
 
