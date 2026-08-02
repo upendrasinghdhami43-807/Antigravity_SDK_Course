@@ -62,7 +62,7 @@ class Engine:
 
     def _register_commands(self):
         # Module 05 Commands
-        self.command_router.register("/help", lambda args: print("Commands: /help, /architecture, /pipeline, /planner, /reasoning, /context, /memory, /history, /session, /provider, /stats, /config, /logs, /events, /performance, /reset, /exit, /persona, /system, /developer, /showprompt, /prompts, /template, /variables, /examples, /reloadprompts, /schema, /json, /validate, /parser, /format, /object, /response, /pretty, /exportjson, /exportmd"))
+        self.command_router.register("/help", lambda args: print("Commands: /help, /architecture, /pipeline, /planner, /reasoning, /context, /memory, /history, /session, /provider, /stats, /config, /logs, /events, /performance, /reset, /exit, /persona, /system, /developer, /showprompt, /prompts, /template, /variables, /examples, /reloadprompts, /schema, /json, /validate, /parser, /format, /object, /response, /pretty, /exportjson, /exportmd, /models"))
         self.command_router.register("/architecture", lambda args: print("Phase 2 Architecture loaded."))
         self.command_router.register("/pipeline", lambda args: print("Pipeline: Planner -> Reasoning -> Context -> Prompt -> Provider -> Parser -> Output"))
         self.command_router.register("/planner", lambda args: print("Planner details pending request..."))
@@ -72,6 +72,7 @@ class Engine:
         self.command_router.register("/history", lambda args: print(self.history.get_history()))
         self.command_router.register("/session", lambda args: print(self.session.get_state()))
         self.command_router.register("/provider", lambda args: print(f"Provider: {self.config.default_model}"))
+        self.command_router.register("/models", self._handle_models_command)
         self.command_router.register("/stats", lambda args: print(self.statistics.get_statistics()))
         self.command_router.register("/config", lambda args: print(self.config.as_dict()))
         self.command_router.register("/logs", lambda args: print("Tail logs via logs/framework.log"))
@@ -106,3 +107,92 @@ class Engine:
     def shutdown(self):
         self.session.end_session()
         self.events.publish("ApplicationClosed")
+
+    def _handle_models_command(self, args):
+        menu = """
+============================
+Available Gemini Models
+============================
+
+--- General / Fast (Free Tier Friendly) ---
+1. gemini-2.5-flash
+2. gemini-2.0-flash
+3. gemini-2.0-flash-001
+4. gemini-2.0-flash-lite-001
+5. gemini-2.0-flash-lite
+6. gemini-flash-latest
+7. gemini-flash-lite-latest
+8. gemini-2.5-flash-lite
+
+--- Complex Reasoning (Pro) ---
+9. gemini-2.5-pro
+10. gemini-pro-latest
+
+--- Image & Vision ---
+11. gemini-2.5-flash-image
+12. gemini-3-pro-image-preview
+13. gemini-3-pro-image
+14. gemini-3.1-flash-image-preview
+15. gemini-3.1-flash-image
+16. gemini-3.1-flash-lite-image
+
+--- Audio & Voice ---
+17. gemini-2.5-flash-preview-tts
+18. gemini-2.5-pro-preview-tts
+19. gemini-3.1-flash-tts-preview
+20. gemini-2.5-flash-native-audio-latest
+21. gemini-2.5-flash-native-audio-preview-09-2025
+22. gemini-2.5-flash-native-audio-preview-12-2025
+
+--- Embeddings & Search ---
+23. gemini-embedding-001
+24. gemini-embedding-2-preview
+25. gemini-embedding-2
+
+--- Preview & Experimental (May be Paid) ---
+26. gemini-3-pro-preview
+27. gemini-3-flash-preview
+28. gemini-3.1-pro-preview
+29. gemini-3.1-pro-preview-customtools
+30. gemini-3.1-flash-lite-preview
+31. gemini-3.1-flash-lite
+32. gemini-3.5-flash
+33. gemini-3.5-flash-lite
+34. gemini-omni-flash-preview
+35. gemini-3.6-flash
+36. gemini-robotics-er-1.5-preview
+37. gemini-robotics-er-1.6-preview
+38. gemini-robotics-er-2-preview
+39. gemini-2.5-computer-use-preview-10-2025
+40. gemini-3.1-flash-live-preview
+41. gemini-robotics-er-2-streaming-preview
+42. gemini-3.5-live-translate-preview
+"""
+        print(menu)
+        
+        try:
+            choice = input(f"Current Model: {self.config.default_model}\nSelect a model number: ").strip()
+            models = {
+                "1": "gemini-2.5-flash", "2": "gemini-2.0-flash", "3": "gemini-2.0-flash-001", "4": "gemini-2.0-flash-lite-001",
+                "5": "gemini-2.0-flash-lite", "6": "gemini-flash-latest", "7": "gemini-flash-lite-latest", "8": "gemini-2.5-flash-lite",
+                "9": "gemini-2.5-pro", "10": "gemini-pro-latest", "11": "gemini-2.5-flash-image", "12": "gemini-3-pro-image-preview",
+                "13": "gemini-3-pro-image", "14": "gemini-3.1-flash-image-preview", "15": "gemini-3.1-flash-image", "16": "gemini-3.1-flash-lite-image",
+                "17": "gemini-2.5-flash-preview-tts", "18": "gemini-2.5-pro-preview-tts", "19": "gemini-3.1-flash-tts-preview", "20": "gemini-2.5-flash-native-audio-latest",
+                "21": "gemini-2.5-flash-native-audio-preview-09-2025", "22": "gemini-2.5-flash-native-audio-preview-12-2025", "23": "gemini-embedding-001",
+                "24": "gemini-embedding-2-preview", "25": "gemini-embedding-2", "26": "gemini-3-pro-preview", "27": "gemini-3-flash-preview",
+                "28": "gemini-3.1-pro-preview", "29": "gemini-3.1-pro-preview-customtools", "30": "gemini-3.1-flash-lite-preview",
+                "31": "gemini-3.1-flash-lite", "32": "gemini-3.5-flash", "33": "gemini-3.5-flash-lite", "34": "gemini-omni-flash-preview",
+                "35": "gemini-3.6-flash", "36": "gemini-robotics-er-1.5-preview", "37": "gemini-robotics-er-1.6-preview",
+                "38": "gemini-robotics-er-2-preview", "39": "gemini-2.5-computer-use-preview-10-2025", "40": "gemini-3.1-flash-live-preview",
+                "41": "gemini-robotics-er-2-streaming-preview", "42": "gemini-3.5-live-translate-preview"
+            }
+            if choice in models:
+                self.config.default_model = models[choice]
+                print(f"Model changed to {self.config.default_model}")
+                # Update the variable in VariableManager so prompt templates reflect the correct model
+                if hasattr(self, 'prompt_manager') and hasattr(self.prompt_manager, 'variable_manager'):
+                    self.prompt_manager.variable_manager.set_variable("CURRENT_MODEL", self.config.default_model)
+            else:
+                print("Invalid selection. Model not changed.")
+        except Exception as e:
+            print(f"Error selecting model: {e}")

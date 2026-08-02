@@ -5,10 +5,14 @@ import re
 class VariableManager:
     """Manages variables injected into prompt templates (e.g., {{USER_NAME}})."""
     def __init__(self):
+        import uuid
         self.variables: Dict[str, Any] = {
             "CURRENT_DATE": datetime.now().strftime("%Y-%m-%d"),
             "CURRENT_TIME": datetime.now().strftime("%H:%M:%S"),
             "USER_NAME": "User", # Can be overridden by config/memory
+            "CURRENT_MODEL": "gemini-flash-lite-latest", # Default
+            "LANGUAGE": "English",
+            "SESSION_ID": str(uuid.uuid4()), # Generate a random session ID
         }
 
     def set_variable(self, key: str, value: Any):

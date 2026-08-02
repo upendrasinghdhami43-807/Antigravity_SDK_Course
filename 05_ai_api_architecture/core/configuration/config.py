@@ -18,7 +18,7 @@ class Config:
         if not self.gemini_api_key:
             raise ConfigurationError("GEMINI_API_KEY is required but not set in the environment.")
         
-        self.default_model = os.getenv("DEFAULT_MODEL", "gemini-2.5-flash")
+        self.default_model = os.getenv("DEFAULT_MODEL", "gemini-flash-lite-latest")
         
         try:
             self.temperature = float(os.getenv("TEMPERATURE", "0.7"))
