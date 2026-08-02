@@ -14,6 +14,16 @@ class PromptValidator:
         # Check for unreplaced variables
         unreplaced = re.findall(r'\{\{(.*?)\}\}', prompt)
         if unreplaced:
-            # Maybe just warn instead of fail, but for now we'll allow it or just log.
-            # In a strict environment, this could raise an error.
-            pass
+            raise PromptValidationError(f"Prompt contains unresolved variables: {unreplaced}")
+
+        # Security: Prevent Prompt Injection
+        lower_prompt = prompt.lower()
+        forbidden_phrases = [
+            "ignore previous instructions",
+            "disregard previous instructions",
+            "forget previous instructions"
+        ]
+        for phrase in forbidden_phrases:
+            if phrase in lower_prompt:
+                raise PromptValidationError("Security Violation: Attempted prompt injection detected.")
+

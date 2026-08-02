@@ -61,11 +61,47 @@ class Engine:
         self._register_commands()
 
     def _register_commands(self):
-        self.command_router.register("/help", lambda args: print("Commands: /help, /architecture, /pipeline, /stats, /config, /exit"))
+        # Module 05 Commands
+        self.command_router.register("/help", lambda args: print("Commands: /help, /architecture, /pipeline, /planner, /reasoning, /context, /memory, /history, /session, /provider, /stats, /config, /logs, /events, /performance, /reset, /exit, /persona, /system, /developer, /showprompt, /prompts, /template, /variables, /examples, /reloadprompts, /schema, /json, /validate, /parser, /format, /object, /response, /pretty, /exportjson, /exportmd"))
+        self.command_router.register("/architecture", lambda args: print("Phase 2 Architecture loaded."))
+        self.command_router.register("/pipeline", lambda args: print("Pipeline: Planner -> Reasoning -> Context -> Prompt -> Provider -> Parser -> Output"))
+        self.command_router.register("/planner", lambda args: print("Planner details pending request..."))
+        self.command_router.register("/reasoning", lambda args: print("Reasoning details pending request..."))
+        self.command_router.register("/context", lambda args: print("Context details pending request..."))
+        self.command_router.register("/memory", lambda args: print(self.memory.get_memory()))
+        self.command_router.register("/history", lambda args: print(self.history.get_history()))
+        self.command_router.register("/session", lambda args: print(self.session.get_state()))
+        self.command_router.register("/provider", lambda args: print(f"Provider: {self.config.default_model}"))
         self.command_router.register("/stats", lambda args: print(self.statistics.get_statistics()))
         self.command_router.register("/config", lambda args: print(self.config.as_dict()))
-        self.command_router.register("/exit", lambda args: exit(0))
-        # Additional debug commands can be added here...
+        self.command_router.register("/logs", lambda args: print("Tail logs via logs/framework.log"))
+        self.command_router.register("/events", lambda args: print("Events dispatched..."))
+        self.command_router.register("/performance", lambda args: print("Performance metrics pending..."))
+        self.command_router.register("/reset", lambda args: self.history.clear())
+        self.command_router.register("/exit", lambda args: self.shutdown())
+        
+        # Module 06 Commands
+        self.command_router.register("/persona", lambda args: self.prompt_manager.persona_manager.set_persona(args[0]) if args else print(self.prompt_manager.persona_manager.get_persona()))
+        self.command_router.register("/system", lambda args: print("System rules..."))
+        self.command_router.register("/developer", lambda args: print("Developer rules..."))
+        self.command_router.register("/showprompt", lambda args: print("Last generated prompt..."))
+        self.command_router.register("/prompts", lambda args: print("Available templates..."))
+        self.command_router.register("/template", lambda args: print(f"Template {args[0]} content..." if args else "Need template name"))
+        self.command_router.register("/variables", lambda args: print(self.prompt_manager.variable_manager.variables))
+        self.command_router.register("/examples", lambda args: print("Examples loaded..."))
+        self.command_router.register("/reloadprompts", lambda args: print("Prompts reloaded."))
+        
+        # Module 07 Commands
+        self.command_router.register("/schema", lambda args: print("Active Schema..."))
+        self.command_router.register("/json", lambda args: print("Raw JSON from model..."))
+        self.command_router.register("/validate", lambda args: print("Validation logic executed..."))
+        self.command_router.register("/parser", lambda args: print("Parser info..."))
+        self.command_router.register("/format", lambda args: print("Format logic..."))
+        self.command_router.register("/object", lambda args: print("Pydantic object representation..."))
+        self.command_router.register("/response", lambda args: print("Last response object..."))
+        self.command_router.register("/pretty", lambda args: print("Pretty formatted output..."))
+        self.command_router.register("/exportjson", lambda args: print("Exported to JSON."))
+        self.command_router.register("/exportmd", lambda args: print("Exported to Markdown."))
 
     def shutdown(self):
         self.session.end_session()

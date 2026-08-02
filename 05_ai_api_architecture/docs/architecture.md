@@ -1,0 +1,3 @@
+# Architecture
+
+The AI API Architecture is a modular, event-driven framework...

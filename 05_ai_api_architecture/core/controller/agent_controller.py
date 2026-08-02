@@ -44,39 +44,60 @@ class AgentController:
     def process_request(self, user_input: str) -> str:
         start_time = time.time()
         self.events.publish("MessageReceived", user_input)
-        
-        # 1. Input Validation (basic)
-        if not user_input.strip():
-            return "Please provide an input."
-
-        # 2. Planner
-        plan = self.planner.create_plan(user_input)
-        self.events.publish("PlannerFinished", plan)
-
-        # 3. Reasoning
-        reasoning_result = self.reasoning.analyze(user_input, plan)
-        self.events.publish("ReasoningFinished", reasoning_result)
-
-        # 4. Context Building
-        mem_data = self.memory.get_memory() if reasoning_result.needs else {}
-        hist_data = self.history.get_history(limit=5)
-        context = self.context_builder.build_context(user_input, mem_data, hist_data)
-        self.events.publish("ContextBuilt")
-
-        # 5. Prompt Pipeline (Module 06)
-        # We request JSON specifically
-        output_instructions = "You MUST return a valid JSON object matching this schema:\n" \
-                              "{'message': 'your reply', 'role': 'assistant', 'timestamp': 'ISO8601'}"
-        final_prompt = self.prompt_pipeline.run_pipeline(context, output_instructions)
-        self.events.publish("PromptBuilt")
-
-        # 6. Provider Execution
-        self.events.publish("ProviderStarted")
         try:
+            self.events.publish("RequestStarted")
+            
+            # 1. Input Validation (basic)
+            if not user_input.strip():
+                return "Please provide an input."
+
+            # 2. Planner
+            plan = self.planner.create_plan(user_input)
+            self.events.publish("PlannerFinished", plan)
+
+            # 3. Reasoning
+            reasoning_result = self.reasoning.analyze(user_input, plan)
+            self.events.publish("ReasoningFinished", reasoning_result)
+
+            # 4. Context Building
+            mem_data = self.memory.get_memory() if reasoning_result.needs else {}
+            hist_data = self.history.get_history(limit=5)
+            context = self.context_builder.build_context(user_input, mem_data, hist_data)
+            self.events.publish("ContextBuilt")
+
+            # 5. Prompt Pipeline (Module 06)
+            # We request JSON specifically
+            output_instructions = "You MUST return a valid JSON object matching this schema:\n" \
+                                  "{'message': 'your reply', 'role': 'assistant', 'timestamp': 'ISO8601'}"
+            final_prompt = self.prompt_pipeline.run_pipeline(context, output_instructions)
+            self.events.publish("PromptBuilt")
+
+            # 6. Provider Execution
+            self.events.publish("ProviderStarted")
             raw_response = self.provider.generate_content(final_prompt)
             self.events.publish("ResponseReceived")
+
+            # 7. Structured Output Engine (Module 07)
+            try:
+                parsed_object = self.output_manager.process(raw_response, ChatResponse)
+                response_text = parsed_object.message
+                self.events.publish("OutputValidated", parsed_object)
+            except StructuredOutputError as e:
+                logger.warning(f"Failed to parse structured output: {e}. Falling back to raw response.")
+                response_text = raw_response
+
+            # 8. History Update
+            self.history.add_message(Message(role="user", content=user_input))
+            self.history.add_message(Message(role="assistant", content=response_text))
+            self.events.publish("HistorySaved")
+
+            # 9. Statistics Update
+            p_tokens = Tokenizer.estimate_tokens(final_prompt)
+            c_tokens = Tokenizer.estimate_tokens(raw_response)
+            self.statistics.record_request(p_tokens, c_tokens, 0) # simplified
+
+            return response_text
         except Exception as e:
-            logger.error(f"Provider Error: {e}")
             self.statistics.record_request(0, 0, (time.time()-start_time)*1000, error=True)
             return f"Error: Provider failed - {e}"
 
