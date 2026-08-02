@@ -1,0 +1,50 @@
+[
+  {
+    "role": "user",
+    "text": "say hello"
+  },
+  {
+    "role": "assistant",
+    "text": "Hello! It's great to meet you. How can I help you today?"
+  },
+  {
+    "role": "user",
+    "text": "my name is bhupesh singh"
+  },
+  {
+    "role": "assistant",
+    "text": "Nice to meet you, Bhupesh! How can I help you today?"
+  },
+  {
+    "role": "user",
+    "text": "what is my name"
+  },
+  {
+    "role": "assistant",
+    "text": "Your name is Bhupesh Singh!"
+  },
+  {
+    "role": "user",
+    "text": "say hello, and tell me my name"
+  },
+  {
+    "role": "assistant",
+    "text": "Hello, Bhupesh Singh! How can I help you today?"
+  },
+  {
+    "role": "user",
+    "text": "my age is 18 year old"
+  },
+  {
+    "role": "assistant",
+    "text": "Got it, Bhupesh! I've noted that you are 18 years old. How can I help you today?"
+  },
+  {
+    "role": "user",
+    "text": "i am bachular  , computer engineerinfg student"
+  },
+  {
+    "role": "assistant",
+    "text": "That's awesome, Bhupesh! Pursuing a Bachelor's degree in Computer Engineering is an exciting field. \n\nSince you're studying computer engineering, feel free to ask me anything about coding, programming languages (like C++, Python, Java), algorithms, system design, or even project ideas for your studies. \n\nHow are your classes going so far, or is there anything specific you're working on right now?"
+  }
+]

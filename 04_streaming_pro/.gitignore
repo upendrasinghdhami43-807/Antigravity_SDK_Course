@@ -1,0 +1,10 @@
+.venv/
+.env
+logs/
+exports/
+__pycache__/
+.vscode/
+*.pyc
+
+# Ignore all user generated data
+data/*.json

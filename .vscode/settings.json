@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/01_hello_agent",
+        "${workspaceFolder}/02_interactive_chat"
+    ]
+}
